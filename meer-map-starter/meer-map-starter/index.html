@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MEER Global Projects Map</title>
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>MEER Global Projects</h1>
+    <p class="subtitle">Explore MEER’s current, historical, and planned projects around the world.</p>
+  </header>
+
+  <main class="map-layout">
+    <!-- Controls Sidebar -->
+    <aside class="controls" id="controls">
+      <div class="control-group">
+        <label class="group-title">Search</label>
+        <input type="text" id="searchInput" placeholder="Search by site or country..." />
+      </div>
+
+      <!-- NEW: Program filter -->
+      <div class="control-group">
+        <label class="group-title">Program</label>
+        <div class="checkboxes" id="programFilters"></div>
+      </div>
+
+      <div class="control-group">
+        <label class="group-title">Region</label>
+        <div class="checkboxes" id="regionFilters"></div>
+      </div>
+
+      <div class="control-group">
+        <label class="group-title">Project Type</label>
+        <div class="checkboxes" id="typeFilters"></div>
+      </div>
+
+      <div class="control-group">
+        <label class="group-title">Status</label>
+        <div class="checkboxes" id="statusFilters"></div>
+      </div>
+
+      <div class="control-group">
+        <button id="resetBtn" class="btn">Reset Filters</button>
+      </div>
+
+      <div class="legend">
+        <div class="legend-title">Legend</div>
+        <div class="legend-item"><span class="dot lab"></span> Laboratory & Testing</div>
+        <div class="legend-item"><span class="dot field"></span> Field Research / Agricultural</div>
+        <div class="legend-item"><span class="dot water"></span> Ecological & Water</div>
+        <div class="legend-item"><span class="dot data"></span> Data & Modelling</div>
+        <div class="legend-item"><span class="dot hub"></span> Coordination & Training Hub</div>
+      </div>
+    </aside>
+
+    <!-- Map -->
+    <div id="map"></div>
+  </main>
+
+  <footer class="site-footer">
+    <small>Developed by MEER – Mirrors for Earth’s Energy Rebalancing</small>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script src="script.js"></script>
+</body>
+</html>

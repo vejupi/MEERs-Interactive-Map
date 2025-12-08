@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>MEER Project Details</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .proj-wrap { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+    .proj-header { margin-bottom: 8px; }
+    .proj-meta { color:#555; font-size:14px; margin-bottom: 16px; }
+    .proj-badge { display:inline-block; background:#eef6ff; border:1px solid #cfe2ff; color:#084298;
+                  padding:4px 8px; border-radius:8px; font-size:12px; margin-right:6px; }
+    .proj-body { line-height:1.6; margin: 16px 0 24px; }
+    .gallery { display:flex; gap:12px; flex-wrap:wrap; margin-bottom: 16px; }
+    .gallery img { width: 280px; height: 180px; object-fit: cover; border-radius: 8px; }
+    .video-wrap { margin: 16px 0; }
+    .video-wrap iframe { width:100%; height: 420px; border:0; border-radius: 8px; }
+    .section { margin-bottom: 20px; }
+    .back { margin: 24px 0; display:inline-block; color:#004a87; text-decoration: underline; }
+    .button { display:inline-block; background:#0077c8; color:#fff; padding:10px 14px; border-radius:6px;
+              text-decoration:none; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="proj-wrap">
+    <a class="back" href="index.html">&larr; Back to map</a>
+    <div id="content">Loading…</div>
+  </div>
+
+  <script>
+    const DATA_URL = 'data/projects.sample.json';
+
+    function getParam(name){
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    function ytEmbed(url){
+      try {
+        const u = new URL(url);
+        if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
+          let id = '';
+          if (u.hostname.includes('youtu.be')) {
+            id = u.pathname.slice(1);
+          } else {
+            id = u.searchParams.get('v') || '';
+          }
+          if (id) {
+            return `<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${id}" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+          }
+        }
+      } catch(e){}
+      return '';
+    }
+
+    function render(project){
+      const el = document.getElementById('content');
+      if (!project){
+        el.innerHTML = `<p>Project not found.</p>`;
+        return;
+      }
+
+      const title = `<h1 class="proj-header">${project.name}</h1>`;
+      const metaLine = `${project.city ? project.city + ', ' : ''}${project.country || ''} · ${project.type || ''} · ${project.status || ''}`;
+      const meta = `<div class="proj-meta">${metaLine}</div>`;
+
+      const badges = [];
+      if (project.program) badges.push(`<span class="proj-badge">${project.program}</span>`);
+      if (project.role) badges.push(`<span class="proj-badge">${project.role}</span>`);
+      const badgeHTML = badges.length ? `<div class="section">${badges.join(' ')}</div>` : '';
+
+      const body = `<div class="proj-body">${project.focus || project.description || ''}</div>`;
+
+      const gallery = Array.isArray(project.images) && project.images.length
+        ? `<div class="gallery">${project.images.map(src => `<img src="${src}" alt="${project.name}">`).join('')}</div>` : '';
+
+      const video = project.video ? ytEmbed(project.video) : '';
+
+      const partners = project.partners ? `<p><strong>Partners:</strong> ${project.partners}</p>` : '';
+      const contact  = project.contact ? `<p><strong>Local Contact:</strong> ${project.contact}</p>` : '';
+      const years    = (project.year_started || project.last_updated)
+        ? `<p><strong>${project.year_started ? 'Started: ' + project.year_started : ''}${project.year_started && project.last_updated ? ' · ' : ''}${project.last_updated ? 'Updated: ' + project.last_updated : ''}</strong></p>` : '';
+
+      el.innerHTML = `
+        ${title}
+        ${meta}
+        ${badgeHTML}
+        ${body}
+        ${gallery}
+        ${video}
+        ${partners}
+        ${contact}
+        ${years}
+      `;
+    }
+
+    (async function(){
+      const id = getParam('id');
+      const res = await fetch(DATA_URL);
+      const list = await res.json();
+      const project = Array.isArray(list) ? list.find(p => p.id === id) : null;
+      render(project);
+    })();
+  </script>
+</body>
+</html>
+
