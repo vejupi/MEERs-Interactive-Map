@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MEER Global Projects Map</title>
+
   <!-- Leaflet CSS -->
   <link
     rel="stylesheet"
@@ -11,6 +12,17 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
+
+  <!-- MarkerCluster CSS (for efficient clustering when many sites exist) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+  />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,30 +33,29 @@
 
   <main class="map-layout">
     <!-- Controls Sidebar -->
-    <aside class="controls" id="controls">
+    <aside class="controls" id="controls" aria-label="Map filters and legend">
       <div class="control-group">
-        <label class="group-title">Search</label>
-        <input type="text" id="searchInput" placeholder="Search by site or country..." />
+        <label class="group-title" for="searchInput">Search</label>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by site or country..."
+          aria-label="Search projects by name, city, or country"
+        />
       </div>
 
-      <!-- NEW: Program filter -->
       <div class="control-group">
-        <label class="group-title">Program</label>
-        <div class="checkboxes" id="programFilters"></div>
-      </div>
-
-      <div class="control-group">
-        <label class="group-title">Region</label>
+        <span class="group-title">Region</span>
         <div class="checkboxes" id="regionFilters"></div>
       </div>
 
       <div class="control-group">
-        <label class="group-title">Project Type</label>
+        <span class="group-title">Project Type</span>
         <div class="checkboxes" id="typeFilters"></div>
       </div>
 
       <div class="control-group">
-        <label class="group-title">Status</label>
+        <span class="group-title">Status</span>
         <div class="checkboxes" id="statusFilters"></div>
       </div>
 
@@ -52,18 +63,18 @@
         <button id="resetBtn" class="btn">Reset Filters</button>
       </div>
 
-      <div class="legend">
+      <div class="legend" aria-label="Map legend">
         <div class="legend-title">Legend</div>
-        <div class="legend-item"><span class="dot lab"></span> Laboratory & Testing</div>
+        <div class="legend-item"><span class="dot lab"></span> Laboratory &amp; Testing</div>
         <div class="legend-item"><span class="dot field"></span> Field Research / Agricultural</div>
-        <div class="legend-item"><span class="dot water"></span> Ecological & Water</div>
-        <div class="legend-item"><span class="dot data"></span> Data & Modelling</div>
-        <div class="legend-item"><span class="dot hub"></span> Coordination & Training Hub</div>
+        <div class="legend-item"><span class="dot water"></span> Ecological &amp; Water</div>
+        <div class="legend-item"><span class="dot data"></span> Data &amp; Modelling</div>
+        <div class="legend-item"><span class="dot hub"></span> Coordination &amp; Training Hub</div>
       </div>
     </aside>
 
     <!-- Map -->
-    <div id="map"></div>
+    <div id="map" role="application" aria-label="Interactive map of MEER project sites"></div>
   </main>
 
   <footer class="site-footer">
@@ -76,6 +87,9 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
+
+  <!-- MarkerCluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
   <script src="script.js"></script>
 </body>
