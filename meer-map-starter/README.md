@@ -6,7 +6,7 @@ This starter gives you a **standalone interactive map** you can host at `map.mee
 - `index.html` – layout, controls, and Leaflet map container
 - `style.css` – MEER-themed styling (uses #0077c8)
 - `script.js` – loads data, renders markers, popups, and simple filters
-- `data/projects.sample.json` – example data you can replace with your real dataset
+- `data/projects.json` – real dataset
 
 ## Quick start (local)
 Because the map loads JSON via `fetch`, you need to run a local server (opening `index.html` as a file will block the request).
@@ -22,7 +22,7 @@ Then open http://localhost:8000 in your browser.
 Right–click `index.html` → “Open with Live Server”.
 
 ## Data format
-`data/projects.sample.json` contains an array of objects:
+`data/projects.json` contains an array of objects:
 ```json
 {
   "name": "Freetown Cooling Project",

@@ -1,108 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MEER Project Details</title>
-  <link rel="stylesheet" href="style.css"/>
-  <style>
-    .proj-wrap { max-width: 960px; margin: 24px auto; padding: 0 16px; }
-    .proj-header { margin-bottom: 8px; }
-    .proj-meta { color:#555; font-size:14px; margin-bottom: 16px; }
-    .proj-badge { display:inline-block; background:#eef6ff; border:1px solid #cfe2ff; color:#084298;
-                  padding:4px 8px; border-radius:8px; font-size:12px; margin-right:6px; }
-    .proj-body { line-height:1.6; margin: 16px 0 24px; }
-    .gallery { display:flex; gap:12px; flex-wrap:wrap; margin-bottom: 16px; }
-    .gallery img { width: 280px; height: 180px; object-fit: cover; border-radius: 8px; }
-    .video-wrap { margin: 16px 0; }
-    .video-wrap iframe { width:100%; height: 420px; border:0; border-radius: 8px; }
-    .section { margin-bottom: 20px; }
-    .back { margin: 24px 0; display:inline-block; color:#004a87; text-decoration: underline; }
-    .button { display:inline-block; background:#0077c8; color:#fff; padding:10px 14px; border-radius:6px;
-              text-decoration:none; font-weight:600; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="proj-wrap">
-    <a class="back" href="index.html">&larr; Back to map</a>
-    <div id="content">Loading…</div>
-  </div>
+  <header class="site-header">
+    <h1>MEER Project</h1>
+    <p class="subtitle">Gallery, media, and details for this project site.</p>
+  </header>
+
+  <main class="proj-wrap">
+    <h2 id="projectName" class="proj-header"></h2>
+    <div id="projectMeta" class="proj-meta"></div>
+
+    <div id="projectBadges" class="proj-badges"></div>
+
+    <section class="section">
+      <h3>Overview</h3>
+      <div id="projectBody" class="proj-body"></div>
+    </section>
+
+    <section class="section">
+      <h3>Gallery</h3>
+      <div id="projectGallery" class="gallery"></div>
+    </section>
+
+    <section class="section">
+      <h3>Video & Media</h3>
+      <div id="projectVideos" class="video-grid"></div>
+    </section>
+
+    <section class="section">
+      <h3>Partners & Contacts</h3>
+      <div id="projectPartners" class="proj-body"></div>
+    </section>
+
+    <a href="index.html" class="button" style="margin-top:16px;">Back to Map</a>
+  </main>
 
   <script>
-    const DATA_URL = 'data/projects.sample.json';
+    const DATA_URL = 'data/projects.json';
 
-    function getParam(name){
-      const url = new URL(window.location.href);
-      return url.searchParams.get(name);
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
     }
 
-    function ytEmbed(url){
-      try {
-        const u = new URL(url);
-        if (u.hostname.includes('youtube.com') || u.hostname.includes('youtu.be')) {
-          let id = '';
-          if (u.hostname.includes('youtu.be')) {
-            id = u.pathname.slice(1);
-          } else {
-            id = u.searchParams.get('v') || '';
-          }
-          if (id) {
-            return `<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${id}" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
-          }
-        }
-      } catch(e){}
-      return '';
-    }
+    function render(p) {
+      document.getElementById('projectName').textContent = p.name || 'MEER Project';
 
-    function render(project){
-      const el = document.getElementById('content');
-      if (!project){
-        el.innerHTML = `<p>Project not found.</p>`;
-        return;
+      const location = [p.city, p.country].filter(Boolean).join(', ');
+      document.getElementById('projectMeta').textContent =
+        [location, p.type, p.status].filter(Boolean).join(' · ');
+
+      // badges
+      const badges = [];
+      if (p.program) badges.push(`<span class="proj-badge">${esc(p.program)} Programme</span>`);
+      if (p.role) badges.push(`<span class="proj-badge">${esc(p.role)}</span>`);
+      if (p.status) badges.push(`<span class="proj-badge">${esc(p.status)}</span>`);
+      document.getElementById('projectBadges').innerHTML = badges.join(' ');
+
+      // overview body
+      const focus = p.details || p.focus || p.description || '';
+      const years = [
+        p.year_started ? `Started: ${esc(p.year_started)}` : '',
+        p.last_updated ? `Last updated: ${esc(p.last_updated)}` : ''
+      ].filter(Boolean).join(' · ');
+
+      document.getElementById('projectBody').innerHTML = `
+        ${focus ? `<p>${esc(focus)}</p>` : `<p>No overview text yet.</p>`}
+        ${years ? `<p class="proj-meta">${years}</p>` : ``}
+        ${p.notes ? `<p><strong>Notes:</strong> ${esc(p.notes)}</p>` : ``}
+      `;
+
+      // gallery
+      const imgs = Array.isArray(p.images) ? p.images : [];
+      const galleryEl = document.getElementById('projectGallery');
+      galleryEl.innerHTML = imgs.length
+        ? imgs.map(src => `<img src="${esc(src)}" alt="${esc(p.name)}" class="gallery-img" loading="lazy">`).join('')
+        : `<p>No images available yet for this site.</p>`;
+
+      // videos (support both older "video" string and new "videos" array)
+      const vids = Array.isArray(p.videos) ? p.videos : (p.video ? [p.video] : []);
+const videosEl = document.getElementById('projectVideos');
+
+videosEl.innerHTML = vids.length
+  ? vids.map(v => {
+      const isYouTube = v.includes('youtube.com') || v.includes('youtu.be');
+      const isMP4 = v.endsWith('.mp4');
+
+      if (isYouTube) {
+        return `
+          <div class="video-card">
+            <iframe
+              src="${esc(v)}"
+              title="Project video"
+              loading="lazy"
+              allowfullscreen>
+            </iframe>
+          </div>
+        `;
       }
 
-      const title = `<h1 class="proj-header">${project.name}</h1>`;
-      const metaLine = `${project.city ? project.city + ', ' : ''}${project.country || ''} · ${project.type || ''} · ${project.status || ''}`;
-      const meta = `<div class="proj-meta">${metaLine}</div>`;
+      if (isMP4) {
+        return `
+          <div class="video-card">
+            <video controls preload="metadata">
+              <source src="${esc(v)}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        `;
+      }
 
-      const badges = [];
-      if (project.program) badges.push(`<span class="proj-badge">${project.program}</span>`);
-      if (project.role) badges.push(`<span class="proj-badge">${project.role}</span>`);
-      const badgeHTML = badges.length ? `<div class="section">${badges.join(' ')}</div>` : '';
+      return '';
+    }).join('')
+  : `<p>No video has been added yet.</p>`;
 
-      const body = `<div class="proj-body">${project.focus || project.description || ''}</div>`;
-
-      const gallery = Array.isArray(project.images) && project.images.length
-        ? `<div class="gallery">${project.images.map(src => `<img src="${src}" alt="${project.name}">`).join('')}</div>` : '';
-
-      const video = project.video ? ytEmbed(project.video) : '';
-
-      const partners = project.partners ? `<p><strong>Partners:</strong> ${project.partners}</p>` : '';
-      const contact  = project.contact ? `<p><strong>Local Contact:</strong> ${project.contact}</p>` : '';
-      const years    = (project.year_started || project.last_updated)
-        ? `<p><strong>${project.year_started ? 'Started: ' + project.year_started : ''}${project.year_started && project.last_updated ? ' · ' : ''}${project.last_updated ? 'Updated: ' + project.last_updated : ''}</strong></p>` : '';
-
-      el.innerHTML = `
-        ${title}
-        ${meta}
-        ${badgeHTML}
-        ${body}
-        ${gallery}
-        ${video}
-        ${partners}
-        ${contact}
-        ${years}
-      `;
+      // partners/contacts
+      const partnerLines = [];
+      if (p.partners) partnerLines.push(`<p><strong>Partners:</strong> ${esc(p.partners)}</p>`);
+      if (p.contact) partnerLines.push(`<p><strong>Local contact:</strong> ${esc(p.contact)}</p>`);
+      if (p.link) partnerLines.push(`<p><strong>View more on our website:</strong> <a href="${esc(p.link)}">${esc(p.link)}</a></p>`);
+      document.getElementById('projectPartners').innerHTML =
+        partnerLines.length ? partnerLines.join('') : `<p>Partner and contact info will be added soon.</p>`;
     }
 
-    (async function(){
-      const id = getParam('id');
-      const res = await fetch(DATA_URL);
-      const list = await res.json();
-      const project = Array.isArray(list) ? list.find(p => p.id === id) : null;
-      render(project);
-    })();
+    if (!id) {
+      alert('No project selected.');
+      window.location.href = 'index.html';
+    } else {
+      fetch(DATA_URL)
+        .then(r => r.json())
+        .then(data => {
+          const p = data.find(x => x.id === id);
+          if (!p) {
+            alert('Project not found.');
+            window.location.href = 'index.html';
+            return;
+          }
+          render(p);
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Could not load project data.');
+        });
+    }
   </script>
 </body>
 </html>
+
 

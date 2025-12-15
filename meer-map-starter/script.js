@@ -1,6 +1,4 @@
-// IMPORTANT: make sure this matches your actual file name:
-// if your file is data/projects.json, change it below.
-const DATA_URL = 'data/projects.sample.json';
+const DATA_URL = 'data/projects.json';
 
 const CATEGORY_CLASSES = {
   "Laboratory & Testing": "lab",
@@ -138,17 +136,25 @@ function initMap() {
     renderMarkers();
   });
 
+  // Bulletproof: nudge the map so popups don't hide under the header
   map.on('popupopen', (e) => {
-    map.panInside(e.popup.getLatLng(), {
-      paddingTopLeft: [0, 80]
-    });
+    setTimeout(() => {
+      try {
+        const ll = e.popup.getLatLng();
+        const px = map.project(ll);
+        px.y -= 120; // push popup down into view (accounts for header)
+        map.panTo(map.unproject(px), { animate: true });
+      } catch (err) {
+        // fail silently
+      }
+    }, 40);
   });
 }
 
 function buildFilterControls() {
   const regions = [...new Set(allProjects.map(p => p.region).filter(Boolean))].sort();
-  const types   = [...new Set(allProjects.map(p => p.type).filter(Boolean))].sort();
-  const statuses= [...new Set(allProjects.map(p => p.status).filter(Boolean))].sort();
+  const types = [...new Set(allProjects.map(p => p.type).filter(Boolean))].sort();
+  const statuses = [...new Set(allProjects.map(p => p.status).filter(Boolean))].sort();
 
   const makeGroup = (arr, containerId, setRef) => {
     const container = document.getElementById(containerId);
@@ -168,14 +174,14 @@ function buildFilterControls() {
   };
 
   makeGroup(regions, 'regionFilters', state.regions);
-  makeGroup(types,   'typeFilters',   state.types);
-  makeGroup(statuses,'statusFilters', state.statuses);
+  makeGroup(types, 'typeFilters', state.types);
+  makeGroup(statuses, 'statusFilters', state.statuses);
 }
 
 function passesFilters(p) {
   const matchRegion = state.regions.size ? state.regions.has(p.region) : true;
-  const matchType   = state.types.size   ? state.types.has(p.type) : true;
-  const matchStatus = state.statuses.size? state.statuses.has(p.status) : true;
+  const matchType = state.types.size ? state.types.has(p.type) : true;
+  const matchStatus = state.statuses.size ? state.statuses.has(p.status) : true;
   const text = `${p.name} ${p.country || ''} ${p.city || ''} ${p.description || ''} ${p.focus || ''}`.toLowerCase();
   const matchSearch = state.search ? text.includes(state.search) : true;
   return matchRegion && matchType && matchStatus && matchSearch;
@@ -186,12 +192,21 @@ function renderMarkers() {
   markers = [];
 
   const visible = allProjects.filter(p => passesFilters(p));
+
+  const popupOpts = {
+    maxWidth: 320,
+    autoPan: true,
+    keepInView: true,
+    closeButton: true,
+    autoPanPaddingTopLeft: L.point(20, 140),   // extra space for header
+    autoPanPaddingBottomRight: L.point(20, 20)
+  };
+
   visible.forEach(p => {
     if (typeof p.lat !== 'number' || typeof p.lng !== 'number') return;
 
-    const m = L.marker([p.lat, p.lng], { icon: markerFor(p) });
-
-    m.bindPopup(popupHTML(p), { maxWidth: 300 });
+    const m = L.marker([p.lat, p.lng], { icon: markerFor(p) })
+      .bindPopup(popupHTML(p), popupOpts);
 
     // hover tooltip preview
     m.bindTooltip(
@@ -211,7 +226,7 @@ function renderMarkers() {
     markers.push(m);
   });
 
-  if (visible.length) {
+  if (markers.length) {
     const group = L.featureGroup(markers);
     map.fitBounds(group.getBounds().pad(0.2), { animate: true });
   }
