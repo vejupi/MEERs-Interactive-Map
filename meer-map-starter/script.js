@@ -8,6 +8,8 @@ const CATEGORY_CLASSES = {
   "Coordination & Training": "hub"
 };
 
+const IS_MOBILE = window.matchMedia('(max-width: 768px)').matches;
+
 function markerFor(project) {
   const cat = CATEGORY_CLASSES[project.type] || "field";
   const html = `<span class="dot ${cat}"></span>`;
@@ -86,10 +88,39 @@ const state = {
   search: ''
 };
 
+/**
+ * Pan the map *just enough* so the popup is visible.
+ * This avoids centering/zooming that can cause popups to immediately close on mobile.
+ */
+function panPopupIntoView(popup) {
+  if (!popup || !map) return;
+
+  // Wait for popup to render (especially images), then pan inside view.
+  setTimeout(() => {
+    try {
+      const padTop = 140;   // clears your header
+      const padSide = 16;
+      const padBottom = 24;
+
+      map.panInside(popup.getLatLng(), {
+        paddingTopLeft: [padSide, padTop],
+        paddingBottomRight: [padSide, padBottom],
+        animate: true
+      });
+    } catch (_) {}
+  }, 80);
+}
+
 function initMap() {
   map = L.map('map', {
     minZoom: 2,
-    worldCopyJump: true
+    worldCopyJump: true,
+
+    // don't auto-close popups from taps/scrolls
+    closePopupOnClick: false,
+
+    // helps some mobile browsers
+    tap: false
   }).setView([15, 10], 2);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -100,15 +131,13 @@ function initMap() {
   // cluster group for performance
   markerLayer = L.markerClusterGroup({
     showCoverageOnHover: false,
-    maxClusterRadius: 45
+    maxClusterRadius: 45,
+    spiderfyOnMaxZoom: true
   }).addTo(map);
 
   fetch(DATA_URL)
     .then(r => {
-      if (!r.ok) {
-        console.error('Failed to fetch data:', r.status, r.statusText);
-        throw new Error('Network response was not ok');
-      }
+      if (!r.ok) throw new Error(`Fetch failed: ${r.status} ${r.statusText}`);
       return r.json();
     })
     .then(data => {
@@ -118,7 +147,7 @@ function initMap() {
     })
     .catch(err => {
       console.error('Failed to load data:', err);
-      alert('Could not load project data. Check DATA_URL and JSON file name/path.');
+      alert('Could not load project data. Check DATA_URL and that data/projects.json exists.');
     });
 
   document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -136,18 +165,33 @@ function initMap() {
     renderMarkers();
   });
 
-  // Bulletproof: nudge the map so popups don't hide under the header
+  // When any popup opens, make sure it's visible (especially on mobile)
   map.on('popupopen', (e) => {
-    setTimeout(() => {
+    if (IS_MOBILE) {
+      panPopupIntoView(e.popup);
+    } else {
+      // desktop: gentle pan to avoid hiding under header
       try {
-        const ll = e.popup.getLatLng();
-        const px = map.project(ll);
-        px.y -= 120; // push popup down into view (accounts for header)
-        map.panTo(map.unproject(px), { animate: true });
-      } catch (err) {
-        // fail silently
-      }
-    }, 40);
+        map.panInside(e.popup.getLatLng(), {
+          paddingTopLeft: [20, 140],
+          paddingBottomRight: [20, 20],
+          animate: true
+        });
+      } catch (_) {}
+    }
+
+    // stop touch/click bubbling from closing popup
+    const el = e.popup.getElement();
+    if (el) {
+      L.DomEvent.disableClickPropagation(el);
+      L.DomEvent.disableScrollPropagation(el);
+
+      ['touchstart','touchmove','touchend','pointerdown','pointerup','mousedown','click'].forEach(evt => {
+        el.addEventListener(evt, (ev) => {
+          ev.stopPropagation();
+        }, { passive: true });
+      });
+    }
   });
 }
 
@@ -195,11 +239,15 @@ function renderMarkers() {
 
   const popupOpts = {
     maxWidth: 320,
-    autoPan: true,
-    keepInView: true,
-    closeButton: true,
-    autoPanPaddingTopLeft: L.point(20, 140),   // extra space for header
-    autoPanPaddingBottomRight: L.point(20, 20)
+
+    // critical: don't let Leaflet auto-pan on mobile (it can cause instant close)
+    autoPan: !IS_MOBILE,
+    keepInView: !IS_MOBILE,
+
+    // keep popups open while interacting
+    closeOnClick: false,
+    autoClose: false,
+    closeButton: true
   };
 
   visible.forEach(p => {
@@ -208,18 +256,24 @@ function renderMarkers() {
     const m = L.marker([p.lat, p.lng], { icon: markerFor(p) })
       .bindPopup(popupHTML(p), popupOpts);
 
-    // hover tooltip preview
-    m.bindTooltip(
-      `${p.name}${p.country ? ' – ' + p.country : ''}`,
-      {
-        direction: 'top',
-        offset: [0, -4],
-        opacity: 0.9
-      }
-    );
+    // Tooltip hover preview on desktop only
+    if (!IS_MOBILE) {
+      m.bindTooltip(
+        `${p.name}${p.country ? ' – ' + p.country : ''}`,
+        { direction: 'top', offset: [0, -4], opacity: 0.9 }
+      );
+    }
 
-    m.on('click', () => {
-      map.setView([p.lat, p.lng], Math.max(map.getZoom(), 4), { animate: true });
+    // Mobile-safe click handler
+    m.on('click', (e) => {
+      L.DomEvent.stop(e); // prevents gesture chain issues
+      m.openPopup();
+
+      if (IS_MOBILE) {
+        panPopupIntoView(m.getPopup());
+      } else {
+        map.setView([p.lat, p.lng], Math.max(map.getZoom(), 4), { animate: true });
+      }
     });
 
     markerLayer.addLayer(m);
@@ -233,4 +287,3 @@ function renderMarkers() {
 }
 
 document.addEventListener('DOMContentLoaded', initMap);
-

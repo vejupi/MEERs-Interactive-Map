@@ -1,5 +1,9 @@
 # MEER Global Projects Map – Starter (Leaflet.js)
 
+
+Standalone Leaflet.js map prototype displaying MEER’s worldwide research, training, and field sites. Features JSON-driven data, filtering by region/type/status, pop-ups with site info, and planned image/video/gallery support.
+
+
 This starter gives you a **standalone interactive map** you can host at `map.meer.org` and **embed** inside Webflow with an `<iframe>`.
 
 ## Contents

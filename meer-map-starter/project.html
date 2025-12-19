@@ -7,9 +7,20 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="site-header">
-    <h1>MEER Project</h1>
-    <p class="subtitle">Gallery, media, and details for this project site.</p>
+
+  <!-- ✅ Banner Header (matches your map banner style idea) -->
+  <header class="site-header site-header--banner" aria-label="MEER project header banner">
+    <!-- IMPORTANT: update this path if your image is named differently -->
+    <img
+      src="assets/images/meer-banner-img.png"
+      alt="Earth from space with sunlight"
+      class="site-header-img"
+    />
+    <div class="site-header-overlay">
+      <!-- ✅ This will be replaced by the selected project's name -->
+      <h1 id="projectHeroTitle">MEER Project</h1>
+      <p class="subtitle">Gallery, media, and details for this project site.</p>
+    </div>
   </header>
 
   <main class="proj-wrap">
@@ -54,7 +65,11 @@
     }
 
     function render(p) {
-      document.getElementById('projectName').textContent = p.name || 'MEER Project';
+      const name = p.name || 'MEER Project';
+
+      // ✅ Set both the hero banner title and the page title section
+      document.getElementById('projectHeroTitle').textContent = name;
+      document.getElementById('projectName').textContent = name;
 
       const location = [p.city, p.country].filter(Boolean).join(', ');
       document.getElementById('projectMeta').textContent =
@@ -89,40 +104,40 @@
 
       // videos (support both older "video" string and new "videos" array)
       const vids = Array.isArray(p.videos) ? p.videos : (p.video ? [p.video] : []);
-const videosEl = document.getElementById('projectVideos');
+      const videosEl = document.getElementById('projectVideos');
 
-videosEl.innerHTML = vids.length
-  ? vids.map(v => {
-      const isYouTube = v.includes('youtube.com') || v.includes('youtu.be');
-      const isMP4 = v.endsWith('.mp4');
+      videosEl.innerHTML = vids.length
+        ? vids.map(v => {
+            const isYouTube = v.includes('youtube.com') || v.includes('youtu.be');
+            const isMP4 = v.toLowerCase().endsWith('.mp4');
 
-      if (isYouTube) {
-        return `
-          <div class="video-card">
-            <iframe
-              src="${esc(v)}"
-              title="Project video"
-              loading="lazy"
-              allowfullscreen>
-            </iframe>
-          </div>
-        `;
-      }
+            if (isYouTube) {
+              return `
+                <div class="video-card">
+                  <iframe
+                    src="${esc(v)}"
+                    title="Project video"
+                    loading="lazy"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              `;
+            }
 
-      if (isMP4) {
-        return `
-          <div class="video-card">
-            <video controls preload="metadata">
-              <source src="${esc(v)}" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        `;
-      }
+            if (isMP4) {
+              return `
+                <div class="video-card">
+                  <video controls preload="metadata">
+                    <source src="${esc(v)}" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              `;
+            }
 
-      return '';
-    }).join('')
-  : `<p>No video has been added yet.</p>`;
+            return '';
+          }).join('')
+        : `<p>No video has been added yet.</p>`;
 
       // partners/contacts
       const partnerLines = [];
@@ -156,5 +171,3 @@ videosEl.innerHTML = vids.length
   </script>
 </body>
 </html>
-
-

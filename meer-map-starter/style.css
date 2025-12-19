@@ -21,13 +21,140 @@ img, iframe{
   max-width:100%;
 }
 
-.site-header{
-  padding:16px 20px;
-  background:linear-gradient(135deg, var(--meer-blue) 0%, #004a87 100%);
-  color:#fff;
+/* ✅ Only the MAP PAGE uses this layout */
+body.map-page{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ----------------------------
+   ✅ PROJECT PAGE BANNER HEADER (project.html)
+   Matches the shorter map hero sizing
+----------------------------- */
+.site-header.site-header--banner{
+  position:relative;
+  width:100%;
+  height:150px;              /* ✅ match index hero */
+  overflow:hidden;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+  color:#d5f2fd;
+}
+
+.site-header-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.site-header.site-header--banner::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.25),
+    rgba(0,0,0,0.55)
+  );
+}
+
+.site-header-overlay{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:0 16px;
   text-align:center;
 }
-.site-header .subtitle{opacity:.9; margin:.25rem 0 0}
+
+.site-header-overlay h1{
+  margin:0;
+  font-size:26px;            /* ✅ smaller */
+  font-weight:900;
+  line-height:1.1;
+  text-shadow:0 6px 20px rgba(0,0,0,0.35);
+}
+
+.site-header-overlay .subtitle{
+  margin-top:6px;
+  font-size:13px;
+  max-width:760px;
+  opacity:.95;
+  text-shadow:0 6px 20px rgba(0,0,0,0.35);
+}
+
+/* Smaller on phones */
+@media (max-width: 768px){
+  .site-header.site-header--banner{ height:120px; }  /* ✅ match index hero mobile */
+  .site-header-overlay h1{ font-size:20px; }
+  .site-header-overlay .subtitle{ font-size:12px; }
+}
+
+
+/* ----------------------------
+   ✅ HERO / BANNER HEADER (INDEX MAP PAGE)
+----------------------------- */
+.map-hero{
+  position:relative;
+  width:100%;
+  height:150px;              /* ✅ shorter */
+  overflow:hidden;
+  border-bottom:1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+.map-hero-img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.map-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.25),
+    rgba(0,0,0,0.55)
+  );
+}
+
+.map-hero-overlay{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:0 16px;
+  color:#d5f2fd;
+}
+
+.map-hero-title{
+  margin:0;
+  font-size:28px;            /* ✅ smaller */
+  font-weight:900;
+  letter-spacing:-0.02em;
+  line-height:1.1;
+  text-shadow:0 6px 20px rgba(0,0,0,0.35);
+}
+
+.map-hero-subtitle{
+  margin-top:6px;
+  font-size:14px;
+  max-width:760px;
+  opacity:.95;
+  text-shadow:0 6px 20px rgba(0,0,0,0.35);
+}
 
 /* ----------------------------
    MAP PAGE LAYOUT
@@ -37,7 +164,11 @@ img, iframe{
   grid-template-columns: 320px 1fr;
   gap:16px;
   padding:16px;
-  height: calc(100vh - 110px);
+
+  /* ✅ this is the big fix: fill remaining viewport */
+  flex: 1 1 auto;
+
+  /* ✅ so map doesn't collapse */
   min-height: 520px;
 }
 
@@ -134,16 +265,20 @@ img, iframe{
 ----------------------------- */
 .leaflet-popup-content-wrapper{
   border-radius:10px;
+  max-height: 70vh;
+  overflow: hidden;
   box-shadow: var(--shadow);
 }
 
 .leaflet-popup-content{
   margin: 12px 14px;
+  max-height: 68vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
-.popup{
-  max-width: 280px;
-}
+.popup{ max-width: 100%; }
 
 .popup .title{
   font-weight:800;
@@ -201,6 +336,7 @@ img, iframe{
   text-align:center;
   padding:10px 16px;
   color:var(--muted);
+  flex: 0 0 auto;
 }
 
 /* ----------------------------
@@ -211,15 +347,6 @@ img, iframe{
   margin: 0 auto;
   padding: 18px 16px 40px;
 }
-
-.back{
-  display:inline-block;
-  margin: 8px 0 16px;
-  color: var(--meer-blue);
-  text-decoration: none;
-  font-weight: 800;
-}
-.back:hover{ text-decoration: underline; }
 
 .proj-header{
   margin: 0;
@@ -299,14 +426,12 @@ img, iframe{
   background:#000;
 }
 
-.video-card video {
+.video-card video{
   width: 100%;
   border-radius: 12px;
   box-shadow: var(--shadow);
 }
 
-
-/* Reuse map button style on project pages too */
 a.button{
   display:inline-block;
   background:var(--meer-blue);
@@ -324,17 +449,32 @@ a.button:hover{ filter:brightness(.95); }
 @media (max-width: 992px){
   .map-layout{
     grid-template-columns: 1fr;
-    height:auto;
   }
-  #map{ height:70vh; }
+  #map{ height:75vh; } /* ✅ bigger map on smaller screens */
+}
+
+@media (max-width: 768px){
+  .map-hero{ height:120px; }        /* ✅ shorter on phones */
+  .map-hero-title{ font-size:22px; }
+  .map-hero-subtitle{ font-size:13px; }
+
+  .popup img{ height:110px; }
 }
 
 @media (max-width: 520px){
-  .site-header{ padding: 14px 12px; }
   .proj-header{ font-size: 22px; }
   .gallery-img{ height: 160px; }
   .video-card iframe{ height: 200px; }
   .controls{ padding: 12px; }
+
+  .leaflet-popup-content{
+    max-height: 50vh;
+    max-width: calc(100vw - 24px);
+  }
+}
+
+.leaflet-container{
+  touch-action: pan-x pan-y;
 }
 
 

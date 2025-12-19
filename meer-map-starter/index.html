@@ -13,7 +13,7 @@
     crossorigin=""
   />
 
-  <!-- MarkerCluster CSS (for efficient clustering when many sites exist) -->
+  <!-- MarkerCluster CSS -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
@@ -25,10 +25,23 @@
 
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <header class="site-header">
-    <h1>MEER Global Projects</h1>
-    <p class="subtitle">Explore MEER’s current, historical, and planned projects around the world.</p>
+
+<body class="map-page">
+
+  <!-- ✅ SHORTER HERO HEADER -->
+  <header class="map-hero" aria-label="MEER map header banner">
+    <img
+      src="assets/images/meer-banner-img.png"
+      alt="MEER banner"
+      class="map-hero-img"
+    />
+
+    <div class="map-hero-overlay">
+      <h1 class="map-hero-title">MEER Global Projects</h1>
+      <p class="map-hero-subtitle">
+        Explore MEER’s current, historical, and planned projects around the world.
+      </p>
+    </div>
   </header>
 
   <main class="map-layout">
