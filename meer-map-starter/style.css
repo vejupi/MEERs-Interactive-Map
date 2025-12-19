@@ -169,7 +169,6 @@ body.map-page{
   flex: 1 1 auto;
 
   /* ✅ so map doesn't collapse */
-  min-height: 520px;
 }
 
 .controls{
