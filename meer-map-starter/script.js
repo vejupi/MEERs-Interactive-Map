@@ -123,10 +123,14 @@ function initMap() {
     tap: false
   }).setView([15, 10], 2);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+ L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
     maxZoom: 19
-  }).addTo(map);
+  }
+).addTo(map);
+
 
   // cluster group for performance
   markerLayer = L.markerClusterGroup({
