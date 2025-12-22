@@ -123,14 +123,25 @@ function initMap() {
     tap: false
   }).setView([15, 10], 2);
 
- L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    maxZoom: 19
-  }
-).addTo(map);
+  // ✅ Vertical bounds only (limits latitude, leaves longitude infinite)
+  // Typical "sane" world clamp is about -85 to +85 because Web Mercator.
+  const verticalBounds = L.latLngBounds(
+    L.latLng(-85, -180),
+    L.latLng(85, 180)
+  );
 
+  map.setMaxBounds(verticalBounds);
+
+  // Keeps the user from "fighting" the edge; it gently bounces back inside bounds
+  map.options.maxBoundsViscosity = 1.0;
+
+  L.tileLayer(
+    'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      maxZoom: 19
+    }
+  ).addTo(map);
 
   // cluster group for performance
   markerLayer = L.markerClusterGroup({
