@@ -171,6 +171,40 @@ function initMap() {
   });
 
   document.getElementById('resetBtn').addEventListener('click', () => {
+
+      // ✅ Mobile: Collapsible Filters Drawer toggle
+  const toggleBtn = document.getElementById('filtersToggle');
+  const controlsEl = document.getElementById('controls');
+
+  function setFiltersOpen(isOpen){
+    document.body.classList.toggle('filters-open', isOpen);
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', String(isOpen));
+  }
+
+  if (toggleBtn && controlsEl) {
+    toggleBtn.addEventListener('click', () => {
+      const isOpen = document.body.classList.contains('filters-open');
+      setFiltersOpen(!isOpen);
+    });
+
+    // Click backdrop (outside drawer) closes it
+    document.addEventListener('click', (e) => {
+      if (!document.body.classList.contains('filters-open')) return;
+
+      const clickedInsideControls = controlsEl.contains(e.target);
+      const clickedToggle = toggleBtn.contains(e.target);
+
+      if (!clickedInsideControls && !clickedToggle) {
+        setFiltersOpen(false);
+      }
+    });
+
+    // Escape closes it (nice on tablets / keyboards)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setFiltersOpen(false);
+    });
+  }
+
     state.regions.clear();
     state.types.clear();
     state.statuses.clear();
@@ -301,4 +335,58 @@ function renderMarkers() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', initMap);
+function initFiltersDrawer() {
+  const btn = document.getElementById('filtersToggle');
+  const backdrop = document.getElementById('filtersBackdrop');
+  const controls = document.getElementById('controls');
+
+  // If those elements aren't on the page, do nothing
+  if (!btn || !backdrop || !controls) return;
+
+  const isMobile = window.matchMedia('(max-width: 992px)').matches;
+
+  function openDrawer() {
+    document.body.classList.add('filters-open');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeDrawer() {
+    document.body.classList.remove('filters-open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleDrawer() {
+    if (document.body.classList.contains('filters-open')) closeDrawer();
+    else openDrawer();
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleDrawer();
+  });
+
+  backdrop.addEventListener('click', closeDrawer);
+
+  // Close drawer on ESC (nice for tablets / keyboards)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDrawer();
+  });
+
+  // If user rotates or resizes to desktop, ensure drawer is closed
+  window.addEventListener('resize', () => {
+    const nowMobile = window.matchMedia('(max-width: 992px)').matches;
+    if (!nowMobile) closeDrawer();
+  });
+
+  // Optional: prevent clicks inside drawer from closing it
+  controls.addEventListener('click', (e) => e.stopPropagation());
+
+  // If not mobile, keep it normal (sidebar is visible anyway)
+  if (!isMobile) closeDrawer();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  initFiltersDrawer();
+});

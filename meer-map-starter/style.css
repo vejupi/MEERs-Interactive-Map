@@ -477,3 +477,81 @@ a.button:hover{ filter:brightness(.95); }
 }
 
 
+/* ============================
+   MOBILE FILTER DRAWER
+   ============================ */
+
+/* Hidden on desktop */
+.filters-toggle,
+.filters-backdrop {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  /* Mobile layout: map should come first, controls become a bottom drawer */
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Keep map tall-ish on mobile */
+  #map {
+    height: 75vh;
+  }
+
+  /* Show toggle + backdrop on mobile */
+  .filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    
+
+    height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--meer-blue);
+    color: #fff;
+    font-weight: 800;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+
+  .filters-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+    z-index: 9997;
+  }
+
+  /* Controls become drawer */
+  .controls {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 76px; /* sits above the Filters button */
+    z-index: 9998;
+
+    max-height: 70vh;
+    overflow: auto;
+
+    transform: translateY(120%);
+    transition: transform 220ms ease;
+
+    border-radius: 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Open state */
+  body.filters-open .controls {
+    transform: translateY(0);
+  }
+
+  body.filters-open .filters-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

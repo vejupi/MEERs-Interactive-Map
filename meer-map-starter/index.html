@@ -14,28 +14,20 @@
   />
 
   <!-- MarkerCluster CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
-  />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body class="map-page">
 
-  <!-- ✅ SHORTER HERO HEADER -->
   <header class="map-hero" aria-label="MEER map header banner">
     <img
       src="assets/images/meer-banner-img.png"
       alt="MEER banner"
       class="map-hero-img"
     />
-
     <div class="map-hero-overlay">
       <h1 class="map-hero-title">MEER Global Projects</h1>
       <p class="map-hero-subtitle">
@@ -45,7 +37,7 @@
   </header>
 
   <main class="map-layout">
-    <!-- Controls Sidebar -->
+    <!-- Controls Sidebar / Mobile Drawer -->
     <aside class="controls" id="controls" aria-label="Map filters and legend">
       <div class="control-group">
         <label class="group-title" for="searchInput">Search</label>
@@ -88,7 +80,22 @@
 
     <!-- Map -->
     <div id="map" role="application" aria-label="Interactive map of MEER project sites"></div>
+
+    <button
+    class="filters-toggle"
+    id="filtersToggle"
+    type="button"
+    aria-controls="controls"
+    aria-expanded="false"
+  >
+    Filters
+  </button>
   </main>
+
+  <!-- ✅ Mobile-only Backdrop + Toggle Button -->
+  <div class="filters-backdrop" id="filtersBackdrop" aria-hidden="true"></div>
+
+  
 
   <footer class="site-footer">
     <small>Developed by MEER – Mirrors for Earth’s Energy Rebalancing</small>
@@ -107,3 +114,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
